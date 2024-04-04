@@ -1,39 +1,42 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { CreateUserDto } from './create-user.dto';
-import { User, UserDocument, UserSchema } from '../schemas/user.schema';
+import { PrismaService } from 'prisma/prisma.service';
+import { User, Prisma } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
-  constructor(
-    @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
-  async create(createUserDto: CreateUserDto): Promise<UserDocument> {
-    const createdUser = await this.userModel.create(createUserDto);
-    // hash password
+  async create(data: Prisma.UserCreateInput): Promise<User> {
     const salt = await bcrypt.genSalt(10);
-    createdUser.password = await bcrypt.hash(createdUser.password, salt);
-    await createdUser.save();
+    const hashedPassword = await bcrypt.hash(data.password, salt);
+    const createdUser = await this.prisma.user.create({
+      data: {
+        ...data,
+        password: hashedPassword,
+      },
+    });
     return createdUser;
   }
 
-  async findAll(): Promise<UserDocument[]> {
-    return this.userModel.find().exec();
+  async findAll(): Promise<User[]> {
+    return this.prisma.user.findMany();
   }
 
-  async findOne(id: string): Promise<UserDocument> {
-    return this.userModel.findById(id).exec();
+  async findOne(id: string): Promise<User | null> {
+    return this.prisma.user.findUnique({
+      where: {
+        id,
+      },
+    });
   }
 
-  async findOneByEmail(email: string): Promise<UserDocument> {
-    return this.userModel.findOne({ email }).exec();
+  async findOneByEmail(email: string): Promise<User | null> {
+    return this.prisma.user.findUnique({ where: { email } });
   }
 
   async delete(id: string) {
-    const deletedUser = await this.userModel.findByIdAndDelete(id).exec();
+    const deletedUser = await this.prisma.user.delete({ where: { id } });
     return deletedUser;
   }
 }
