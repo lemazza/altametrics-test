@@ -1,36 +1,26 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { CreateBillDto } from './create-bill.dto';
-import { Bill } from '../schemas/bill.schema';
+import { PrismaService } from 'prisma/prisma.service';
+import { Bill, Prisma } from '@prisma/client';
 
 @Injectable()
 export class BillsService {
-  constructor(
-    @InjectModel(Bill.name) private readonly billModel: Model<Bill>,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
-  async create(createBillDto: CreateBillDto): Promise<Bill> {
-    const createdBill = await this.billModel.create(createBillDto);
+  async create(data: Prisma.BillCreateInput): Promise<Bill> {
+    const createdBill = await this.prisma.bill.create({ data });
     return createdBill;
   }
 
   async findAll(): Promise<Bill[]> {
-    return this.billModel
-      .find()
-      .populate({ path: 'user_id', select: 'name _id' })
-      .exec();
+    return this.prisma.bill.findMany();
   }
 
   async findOne(id: string): Promise<Bill> {
-    return await this.billModel
-      .findById(id)
-      .populate({ path: 'user_id', select: 'name _id id' })
-      .exec();
+    return await this.prisma.bill.findUnique({ where: { id } });
   }
 
   async delete(id: string) {
-    const deletedBill = await this.billModel.findByIdAndDelete(id).exec();
+    const deletedBill = await this.prisma.bill.delete({ where: { id } });
     return deletedBill;
   }
 }

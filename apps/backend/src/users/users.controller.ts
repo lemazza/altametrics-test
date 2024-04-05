@@ -8,8 +8,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './create-user.dto';
-import { User } from '../schemas/user.schema';
+import { User, Prisma } from '@prisma/client';
 import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('users')
@@ -17,8 +16,8 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  async create(@Body() createUserDto: CreateUserDto) {
-    await this.usersService.create(createUserDto);
+  async create(@Body() data: Prisma.UserCreateInput) {
+    await this.usersService.create(data);
   }
 
   @UseGuards(AuthGuard)

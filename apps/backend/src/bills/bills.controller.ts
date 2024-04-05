@@ -8,8 +8,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { BillsService } from './bills.service';
-import { CreateBillDto } from './create-bill.dto';
-import { Bill } from '../schemas/bill.schema';
+import { Bill, Prisma } from '@prisma/client';
 import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('bills')
@@ -18,8 +17,8 @@ export class BillsController {
 
   @UseGuards(AuthGuard)
   @Post()
-  async create(@Body() createBillDto: CreateBillDto) {
-    await this.billsService.create(createBillDto);
+  async create(@Body() data: Prisma.BillCreateInput) {
+    await this.billsService.create(data);
   }
 
   @UseGuards(AuthGuard)

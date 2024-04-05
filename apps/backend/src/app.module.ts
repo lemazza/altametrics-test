@@ -9,6 +9,7 @@ import { BillsModule } from './bills/bills.module';
 import { InvoicesModule } from './invoices/invoices.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { CoreModule } from 'prisma/core.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { AuthModule } from './auth/auth.module';
     }),
     ConfigModule.forRoot({ isGlobal: true }), // allows to use .env file
     MongooseModule.forRoot(process.env.MONGODB_URI), // connect to MongoDB
+    CoreModule,
     BillsModule,
     InvoicesModule,
     UsersModule,
